@@ -1407,6 +1407,9 @@ const locale = {
   server_url_saved: 'تم حفظ عنوان URL للخادم بنجاح',
   error_saving_url: 'حدث خطأ أثناء حفظ عنوان URL للخادم',
   server_url_reset: 'إعادة تعيين عنوان URL للخادم إلى الوضع الافتراضي',
+  language_saved: 'تم حفظ اللغة بنجاح',
+  language_saved_offline:
+    'تم حفظ اللغة على هذا الجهاز وستتم مزامنتها عند الاتصال بالإنترنت',
   reset_to_default: 'إعادة التعيين إلى الوضع الافتراضي',
   list: 'قائمة',
   back_to: 'الرجوع إلى',
@@ -1414,18 +1417,19 @@ const locale = {
   no_results_found: 'لم يتم العثور على نتائج',
   no_sub_assets: 'لا توجد أصول فرعية',
   no_assets_available: 'لا توجد أصول متاحة',
+  you_need_a_license: 'تحتاج إلى ترخيص للوصول إلى هذه الميزة',
   asset_not_found: 'الأصل غير موجود',
   comments: 'التعليقات',
   no_comments: 'لا توجد تعليقات بعد. كن أول من يعلق!',
   post_comment: 'نشر تعليق',
   confirm_delete_comment: 'هل أنت متأكد أنك تريد حذف هذا التعليق؟',
   add_comment_placeholder: 'أضف تعليقًا...',
-  create_category: 'Create Category',
+  id_required: 'المعرّف مطلوب',
+  create_category: 'إنشاء فئة',
   delete_row_confirm_message: 'هل أنت متأكد أنك تريد حذف هذا الصف؟',
   review_prompt_title: 'هل تستمتع باستخدام Atlas CMMS؟',
   feedback_title: 'ساعدنا في التحسين',
-  feedback_description1:
-    'نأسف لسماع ذلك. ملاحظاتك تساعدنا في جعل Atlas أفضل.',
+  feedback_description1: 'نأسف لسماع ذلك. ملاحظاتك تساعدنا في جعل Atlas أفضل.',
   feedback_placeholder: 'أخبرنا ما الخطأ الذي حدث أو كيف يمكننا التحسين…',
   send: 'إرسال'
 };

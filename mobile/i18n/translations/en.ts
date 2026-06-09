@@ -1464,6 +1464,9 @@ const locale = {
   server_url_saved: 'Server URL successfully saved',
   error_saving_url: 'Error occurred while saving the Server URL',
   server_url_reset: 'Server URL reset to default',
+  language_saved: 'Language successfully saved',
+  language_saved_offline:
+    'Language saved on this device and will sync when you are online',
   reset_to_default: 'Reset to default',
   list: 'List',
   back_to: 'Back to',
