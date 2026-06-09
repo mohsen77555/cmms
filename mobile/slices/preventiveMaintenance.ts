@@ -13,12 +13,16 @@ interface PreventiveMaintenanceState {
   preventiveMaintenances: Page<PreventiveMaintenance>;
   singlePreventiveMaintenance: PreventiveMaintenance;
   loadingGet: boolean;
+  currentPageNum: number;
+  lastPage: boolean;
 }
 
 const initialState: PreventiveMaintenanceState = {
   preventiveMaintenances: getInitialPage<PreventiveMaintenance>(),
   singlePreventiveMaintenance: null,
-  loadingGet: false
+  loadingGet: false,
+  currentPageNum: 0,
+  lastPage: true
 };
 const basePath = 'preventive-maintenances';
 const slice = createSlice({
@@ -34,6 +38,22 @@ const slice = createSlice({
     ) {
       const { preventiveMaintenances } = action.payload;
       state.preventiveMaintenances = preventiveMaintenances;
+      state.currentPageNum = preventiveMaintenances.number;
+      state.lastPage = preventiveMaintenances.last;
+    },
+    getMorePreventiveMaintenances(
+      state: PreventiveMaintenanceState,
+      action: PayloadAction<{
+        preventiveMaintenances: Page<PreventiveMaintenance>;
+      }>
+    ) {
+      const { preventiveMaintenances } = action.payload;
+      state.preventiveMaintenances.content = [
+        ...state.preventiveMaintenances.content,
+        ...preventiveMaintenances.content
+      ];
+      state.currentPageNum = preventiveMaintenances.number;
+      state.lastPage = preventiveMaintenances.last;
     },
     getSinglePreventiveMaintenance(
       state: PreventiveMaintenanceState,
@@ -131,6 +151,25 @@ export const getPreventiveMaintenances =
       >(`${basePath}/search`, criteria);
       dispatch(
         slice.actions.getPreventiveMaintenances({ preventiveMaintenances })
+      );
+    } finally {
+      dispatch(slice.actions.setLoadingGet({ loading: false }));
+    }
+  };
+
+export const getMorePreventiveMaintenances =
+  (criteria: SearchCriteria, pageNum: number): AppThunk =>
+  async (dispatch) => {
+    try {
+      dispatch(slice.actions.setLoadingGet({ loading: true }));
+      const preventiveMaintenances = await api.post<
+        Page<PreventiveMaintenance>
+      >(`${basePath}/search`, {
+        ...criteria,
+        pageNum
+      });
+      dispatch(
+        slice.actions.getMorePreventiveMaintenances({ preventiveMaintenances })
       );
     } finally {
       dispatch(slice.actions.setLoadingGet({ loading: false }));

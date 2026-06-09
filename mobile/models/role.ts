@@ -44,6 +44,7 @@ export const createEntities: PermissionEntity[] = [
 ];
 export const viewMoreEntities: PermissionEntity[] = [
   PermissionEntity.PEOPLE_AND_TEAMS,
+  PermissionEntity.PREVENTIVE_MAINTENANCES,
   PermissionEntity.ASSETS,
   PermissionEntity.PARTS_AND_MULTIPARTS,
   PermissionEntity.METERS,
