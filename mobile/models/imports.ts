@@ -31,25 +31,30 @@ interface WorkOrderImportDTO {
   feedback: string;
   customersNames: string[];
 }
-interface AssetImportDTO {
-  id: number;
-  archived: string;
-  locationName: string;
-  parentAssetName: string;
-  area: string;
-  barCode: string;
-  category: string;
+export interface AssetImportDTO {
+  id?: number | null;
+  archived?: string;
+  description?: string;
+  locationName?: string;
+  parentAssetName?: string;
+  area?: string;
+  barCode?: string;
+  category?: string;
   name: string;
-  primaryUserEmail: string;
-  warrantyExpirationDate: number;
-  additionalInfos: string;
-  serialNumber: string;
-  assignedToEmails: string[];
-  teamsNames: string[];
-  status: string;
-  acquisitionCost: number;
-  customersNames: string[];
-  vendorsNames: string[];
+  primaryUserEmail?: string;
+  warrantyExpirationDate?: number;
+  additionalInfos?: string;
+  serialNumber?: string;
+  assignedToEmails?: string[];
+  teamsNames?: string[];
+  status?: string;
+  acquisitionCost?: number;
+  customersNames?: string[];
+  vendorsNames?: string[];
+  partsNames?: string[];
+  model?: string;
+  power?: string;
+  manufacturer?: string;
 }
 interface LocationImportDTO {
   id: number;

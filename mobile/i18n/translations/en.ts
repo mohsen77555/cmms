@@ -1150,6 +1150,9 @@ const locale = {
     '{{created}} Meters have been created and {{updated}} have been updated',
   import_asset_success:
     '{{created}} Assets have been created and {{updated}} have been updated',
+  import_assets_from_excel: 'Import assets from Excel',
+  asset_import_no_rows:
+    'No asset rows were found. Please use the asset import template or the FVV maintenance kit format.',
   wo_calendar: 'Work Orders Calendar',
   month: 'Month',
   week: 'Week',

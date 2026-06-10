@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from '../../store';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { PermissionEntity } from '../../models/role';
 import { getAssetChildren, getAssets, getMoreAssets } from '../../slices/asset';
@@ -16,6 +16,7 @@ import {
   Avatar,
   Button,
   Card,
+  IconButton,
   Searchbar,
   Text,
   useTheme
@@ -32,8 +33,13 @@ import { RootStackScreenProps } from '../../types';
 import Tag from '../../components/Tag';
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect';
 import { IconWithLabel } from '../../components/IconWithLabel';
-import { Asset } from 'expo-asset';
 import { useAppTheme } from '../../custom-theme';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import { parseAssetImportWorkbook } from '../../utils/assetImport';
+import useAssetImport from '../../hooks/useAssetImport';
+import { CustomSnackBarContext } from '../../contexts/CustomSnackBarContext';
+import { PlanFeature } from '../../models/subscriptionPlan';
 
 const AssetCard = ({
   asset,
@@ -134,7 +140,9 @@ export default function AssetsScreen({
   const [view, setView] = useState<'hierarchy' | 'list'>('hierarchy');
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState('');
-  const { hasViewPermission } = useAuth();
+  const { hasViewPermission, hasCreatePermission, hasFeature } = useAuth();
+  const { showSnackBar } = useContext(CustomSnackBarContext);
+  const { importAssets, loadingImport } = useAssetImport();
   const defaultFilterFields: FilterField[] = [];
   const getCriteriaFromFilterFields = (filterFields: FilterField[]) => {
     const initialCriteria: SearchCriteria = {
@@ -184,6 +192,66 @@ export default function AssetsScreen({
 
   const onRefresh = () => {
     setCriteria(getCriteriaFromFilterFields([]));
+  };
+
+  const refreshAssets = () => {
+    dispatch(
+      getAssets({ ...criteria, pageSize: 10, pageNum: 0, direction: 'DESC' })
+    );
+    dispatch(
+      getAssetChildren(route.params?.id ?? 0, route.params?.hierarchy ?? [])
+    );
+    setView('list');
+  };
+
+  const importAssetsFromExcel = async () => {
+    if (!hasFeature(PlanFeature.IMPORT_CSV)) {
+      showSnackBar(t('no_import_access'), 'error');
+      return;
+    }
+
+    if (!hasCreatePermission(PermissionEntity.ASSETS)) {
+      showSnackBar(t('no_access_assets'), 'error');
+      return;
+    }
+
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-excel',
+          'text/csv',
+          'text/comma-separated-values'
+        ],
+        copyToCacheDirectory: true,
+        multiple: false
+      });
+
+      if (result.canceled) return;
+
+      const file = result.assets[0];
+      const base64 = await FileSystem.readAsStringAsync(file.uri, {
+        encoding: FileSystem.EncodingType.Base64
+      });
+      const assetsToImport = parseAssetImportWorkbook(base64, file.name);
+
+      if (!assetsToImport.length) {
+        showSnackBar(t('asset_import_no_rows'), 'error');
+        return;
+      }
+
+      const response = await importAssets(assetsToImport);
+      showSnackBar(
+        t('import_asset_success', {
+          created: response.created,
+          updated: response.updated
+        }),
+        'success'
+      );
+      refreshAssets();
+    } catch (err) {
+      showSnackBar(t('import_error'), 'error');
+    }
   };
 
   const onQueryChange = (query) => {
@@ -240,13 +308,25 @@ export default function AssetsScreen({
     <View
       style={{ ...styles.container, backgroundColor: theme.colors.background }}
     >
-      <Searchbar
-        placeholder={t('search')}
-        onFocus={() => setStartedSearch(true)}
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-        style={{ backgroundColor: theme.colors.background }}
-      />
+      <View style={styles.searchRow}>
+        <Searchbar
+          placeholder={t('search')}
+          onFocus={() => setStartedSearch(true)}
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          style={{ flex: 1, backgroundColor: theme.colors.background }}
+        />
+        {hasCreatePermission(PermissionEntity.ASSETS) && (
+          <IconButton
+            icon="file-excel"
+            mode="contained"
+            loading={loadingImport}
+            disabled={loadingImport}
+            onPress={importAssetsFromExcel}
+            accessibilityLabel={t('import_assets_from_excel')}
+          />
+        )}
+      </View>
       {view === 'list' ? (
         <ScrollView
           style={styles.scrollView}
@@ -322,6 +402,11 @@ const styles = StyleSheet.create({
   scrollView: {
     width: '100%',
     height: '100%'
+  },
+  searchRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center'
   },
   row: {
     display: 'flex',
