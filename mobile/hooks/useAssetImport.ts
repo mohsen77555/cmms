@@ -4,7 +4,13 @@ import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import api from '../utils/api';
 import { getApiUrl } from '../config';
-import { AssetImportDTO, ImportResponse } from '../models/imports';
+import {
+  AssetImportDTO,
+  ImportDTO,
+  ImportResponse,
+  PartImportDTO,
+  PreventiveMaintenanceImportDTO
+} from '../models/imports';
 
 const createUuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
@@ -16,8 +22,9 @@ const createUuid = () =>
 export default function useAssetImport() {
   const [loadingImport, setLoadingImport] = useState(false);
 
-  const importAssets = async (
-    payload: AssetImportDTO[]
+  const importEntity = async (
+    entity: 'assets' | 'parts' | 'preventive-maintenances',
+    payload: ImportDTO[]
   ): Promise<ImportResponse> => {
     setLoadingImport(true);
     const uuid = createUuid();
@@ -67,7 +74,7 @@ export default function useAssetImport() {
           );
 
           api
-            .post(`import/assets?uuid=${uuid}`, payload, {}, true)
+            .post(`import/${entity}?uuid=${uuid}`, payload, {}, true)
             .catch((err) => {
               subscription.unsubscribe();
               cleanup();
@@ -82,5 +89,18 @@ export default function useAssetImport() {
     });
   };
 
-  return { importAssets, loadingImport };
+  const importAssets = (payload: AssetImportDTO[]) =>
+    importEntity('assets', payload);
+  const importParts = (payload: PartImportDTO[]) =>
+    importEntity('parts', payload);
+  const importPreventiveMaintenances = (
+    payload: PreventiveMaintenanceImportDTO[]
+  ) => importEntity('preventive-maintenances', payload);
+
+  return {
+    importAssets,
+    importParts,
+    importPreventiveMaintenances,
+    loadingImport
+  };
 }

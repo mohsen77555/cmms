@@ -41,6 +41,8 @@ export default function AssetDetails({
     { label: t('description'), value: asset?.description },
     { label: t('category'), value: asset?.category?.name },
     { label: t('model'), value: asset?.model },
+    { label: t('manufacturer'), value: asset?.manufacturer },
+    { label: t('power'), value: asset?.power },
     { label: t('serial_number'), value: asset?.serialNumber },
     {
       label: t('status'),

@@ -1,5 +1,10 @@
 import { read, utils } from 'xlsx';
-import { AssetImportDTO } from '../models/imports';
+import {
+  AssetImportDTO,
+  MaintenanceKitImportPayload,
+  PartImportDTO,
+  PreventiveMaintenanceImportDTO
+} from '../models/imports';
 
 type HeaderMap = Partial<Record<keyof AssetImportDTO, string>>;
 
@@ -27,6 +32,9 @@ const parseNumber = (value: unknown): number | undefined => {
       : Number(String(value).replace(/,/g, '').trim());
   return Number.isFinite(parsed) ? parsed : undefined;
 };
+
+const toExcelSerialDate = (date: Date) =>
+  date.getTime() / (24 * 60 * 60 * 1000) + 25569;
 
 const headerAliases: Record<keyof AssetImportDTO, string[]> = {
   id: ['id', 'asset id', 'معرف', 'المعرف', 'رقم'],
@@ -163,14 +171,116 @@ const getValueByLabel = (rows: unknown[][], labels: string[]) => {
   return row?.[1] ? String(row[1]).trim() : '';
 };
 
+const parseFvvFrequency = (
+  value: unknown
+): Pick<
+  PreventiveMaintenanceImportDTO,
+  'recurrenceType' | 'frequency' | 'dueDateDelay'
+> => {
+  const normalized = normalizeHeader(value);
+  if (normalized.includes('يومي') || normalized.includes('daily')) {
+    return { recurrenceType: 'daily', frequency: 1, dueDateDelay: 1 };
+  }
+  if (normalized.includes('اسبوع') || normalized.includes('weekly')) {
+    return { recurrenceType: 'weekly', frequency: 1, dueDateDelay: 2 };
+  }
+  if (normalized.includes('ربع') || normalized.includes('quarter')) {
+    return { recurrenceType: 'monthly', frequency: 3, dueDateDelay: 7 };
+  }
+  if (
+    normalized.includes('نصف') ||
+    normalized.includes('4000') ||
+    normalized.includes('semi')
+  ) {
+    return { recurrenceType: 'monthly', frequency: 6, dueDateDelay: 14 };
+  }
+  if (normalized.includes('سنوي') || normalized.includes('annual')) {
+    return { recurrenceType: 'yearly', frequency: 1, dueDateDelay: 30 };
+  }
+  return { recurrenceType: 'monthly', frequency: 1, dueDateDelay: 7 };
+};
+
+const formatFvvParts = (rows: unknown[][]): PartImportDTO[] =>
+  rows
+    .filter((row) => row[1] || row[2])
+    .map((row) => {
+      const code = String(row[1] ?? '').trim();
+      const description = String(row[2] ?? '').trim();
+      const stock = parseNumber(row[3]);
+      const name = description || code;
+      return {
+        id: null,
+        name,
+        barcode: code,
+        description,
+        quantity: stock ?? 0,
+        minQuantity: 0,
+        nonStock: stock === undefined ? 'Yes' : 'No',
+        category: 'FVV Spare Parts',
+        additionalInfos: `Position: ${row[0] ?? ''}`.trim()
+      };
+    })
+    .filter((part) => !!part.name);
+
+const formatFvvPreventiveMaintenances = (
+  rows: unknown[][],
+  assetName: string,
+  fileName?: string
+): PreventiveMaintenanceImportDTO[] => {
+  const startsOn = toExcelSerialDate(new Date());
+  const endsOn = toExcelSerialDate(
+    new Date(new Date().setFullYear(new Date().getFullYear() + 10))
+  );
+
+  return rows
+    .filter((row) => row[0] || row[1])
+    .map((row) => {
+      const frequencyLabel = String(row[0] ?? '').trim();
+      const task = String(row[1] ?? '').trim();
+      if (!task) return null;
+      const recurrence = parseFvvFrequency(frequencyLabel);
+      return {
+        id: null,
+        startsOn,
+        endsOn,
+        name: `${frequencyLabel} - ${task}`.slice(0, 180),
+        title: task,
+        description: [
+          `Source: ${fileName ?? 'FVV maintenance kit'}`,
+          `Original interval: ${frequencyLabel}`,
+          task
+        ].join('\n'),
+        frequency: recurrence.frequency,
+        dueDateDelay: recurrence.dueDateDelay,
+        recurrenceType: recurrence.recurrenceType,
+        recurrenceBasedOn: 'Scheduled Date',
+        daysOfWeek:
+          recurrence.recurrenceType === 'weekly' ? ['monday'] : undefined,
+        priority: frequencyLabel.includes('يومي') ? 'High' : 'Medium',
+        estimatedDuration: 1,
+        requiredSignature: 'No',
+        category: 'Preventive Maintenance',
+        assetName,
+        locationName: '',
+        teamName: '',
+        primaryUserEmail: '',
+        assignedToEmails: [],
+        customersNames: []
+      };
+    })
+    .filter(Boolean) as PreventiveMaintenanceImportDTO[];
+};
+
 const formatFvvMaintenanceKit = (
   workbook,
   fileName?: string
-): AssetImportDTO[] => {
+): MaintenanceKitImportPayload => {
   const technicalSheet = workbook.SheetNames.find((name: string) =>
     name.includes('البيانات الفنية')
   );
-  if (!technicalSheet) return [];
+  if (!technicalSheet) {
+    return { assets: [], parts: [], preventiveMaintenances: [] };
+  }
 
   const technicalRows = getKeyValueRows(workbook, technicalSheet);
   const model = getValueByLabel(technicalRows, ['الموديل', 'model']);
@@ -213,42 +323,73 @@ const formatFvvMaintenanceKit = (
       .map((row: unknown[]) => `${row[1] ?? ''} - ${row[2] ?? ''}`)
   ].join('\n');
 
-  return [
-    {
-      name: model ? `FVV ${model}` : fileName?.replace(/\.[^.]+$/, '') || 'FVV',
-      description: [model, capacity, speed].filter(Boolean).join(' | '),
-      model,
-      serialNumber,
-      power: power || motor,
-      status: 'OPERATIONAL',
-      category: 'Production Equipment',
-      additionalInfos,
-      partsNames: sparePartsRows
-        .map((row: unknown[]) => String(row[2] ?? '').trim())
-        .filter(Boolean)
-    }
-  ];
+  const assetName = model
+    ? `FVV ${model}`
+    : fileName?.replace(/\.[^.]+$/, '') || 'FVV';
+  const parts = formatFvvParts(sparePartsRows);
+  return {
+    parts,
+    preventiveMaintenances: formatFvvPreventiveMaintenances(
+      maintenanceRows,
+      assetName,
+      fileName
+    ),
+    assets: [
+      {
+        name: assetName,
+        description: [model, capacity, speed].filter(Boolean).join(' | '),
+        model,
+        serialNumber,
+        power: power || motor,
+        status: 'OPERATIONAL',
+        category: 'Production Equipment',
+        additionalInfos,
+        partsNames: parts.map((part) => part.name)
+      }
+    ]
+  };
+};
+
+export const parseMaintenanceKitImportWorkbook = (
+  base64: string,
+  fileName?: string
+): MaintenanceKitImportPayload => {
+  const workbook = read(base64, { type: 'base64' });
+  const fvvPayload = formatFvvMaintenanceKit(workbook, fileName);
+  if (
+    fvvPayload.assets.length ||
+    fvvPayload.parts.length ||
+    fvvPayload.preventiveMaintenances.length
+  ) {
+    return fvvPayload;
+  }
+
+  const sheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
+  const rows = utils.sheet_to_json(sheet, { header: 1, defval: '' });
+  if (rows.length < 2) {
+    return { assets: [], parts: [], preventiveMaintenances: [] };
+  }
+
+  const headers = rows[0] as unknown[];
+  const headerMap = buildHeaderMap(headers);
+  if (!headerMap.name) {
+    return { assets: [], parts: [], preventiveMaintenances: [] };
+  }
+
+  const jsonRows = utils.sheet_to_json<Record<string, unknown>>(sheet, {
+    defval: ''
+  });
+  return {
+    assets: formatGenericRows(jsonRows, headerMap),
+    parts: [],
+    preventiveMaintenances: []
+  };
 };
 
 export const parseAssetImportWorkbook = (
   base64: string,
   fileName?: string
 ): AssetImportDTO[] => {
-  const workbook = read(base64, { type: 'base64' });
-  const fvvAssets = formatFvvMaintenanceKit(workbook, fileName);
-  if (fvvAssets.length) return fvvAssets;
-
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
-  const rows = utils.sheet_to_json(sheet, { header: 1, defval: '' });
-  if (rows.length < 2) return [];
-
-  const headers = rows[0] as unknown[];
-  const headerMap = buildHeaderMap(headers);
-  if (!headerMap.name) return [];
-
-  const jsonRows = utils.sheet_to_json<Record<string, unknown>>(sheet, {
-    defval: ''
-  });
-  return formatGenericRows(jsonRows, headerMap);
+  return parseMaintenanceKitImportWorkbook(base64, fileName).assets;
 };

@@ -36,7 +36,7 @@ import { IconWithLabel } from '../../components/IconWithLabel';
 import { useAppTheme } from '../../custom-theme';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
-import { parseAssetImportWorkbook } from '../../utils/assetImport';
+import { parseMaintenanceKitImportWorkbook } from '../../utils/assetImport';
 import useAssetImport from '../../hooks/useAssetImport';
 import { CustomSnackBarContext } from '../../contexts/CustomSnackBarContext';
 import { PlanFeature } from '../../models/subscriptionPlan';
@@ -142,7 +142,12 @@ export default function AssetsScreen({
   const [searchQuery, setSearchQuery] = useState('');
   const { hasViewPermission, hasCreatePermission, hasFeature } = useAuth();
   const { showSnackBar } = useContext(CustomSnackBarContext);
-  const { importAssets, loadingImport } = useAssetImport();
+  const {
+    importAssets,
+    importParts,
+    importPreventiveMaintenances,
+    loadingImport
+  } = useAssetImport();
   const defaultFilterFields: FilterField[] = [];
   const getCriteriaFromFilterFields = (filterFields: FilterField[]) => {
     const initialCriteria: SearchCriteria = {
@@ -233,18 +238,55 @@ export default function AssetsScreen({
       const base64 = await FileSystem.readAsStringAsync(file.uri, {
         encoding: FileSystem.EncodingType.Base64
       });
-      const assetsToImport = parseAssetImportWorkbook(base64, file.name);
+      const importPayload = parseMaintenanceKitImportWorkbook(
+        base64,
+        file.name
+      );
 
-      if (!assetsToImport.length) {
+      if (
+        !importPayload.assets.length &&
+        !importPayload.parts.length &&
+        !importPayload.preventiveMaintenances.length
+      ) {
         showSnackBar(t('asset_import_no_rows'), 'error');
         return;
       }
 
-      const response = await importAssets(assetsToImport);
+      if (
+        importPayload.preventiveMaintenances.length &&
+        !hasCreatePermission(PermissionEntity.PREVENTIVE_MAINTENANCES)
+      ) {
+        showSnackBar(t('no_access_pm'), 'error');
+        return;
+      }
+
+      if (
+        importPayload.parts.length &&
+        !hasCreatePermission(PermissionEntity.PARTS_AND_MULTIPARTS)
+      ) {
+        showSnackBar(t('no_access_inventory'), 'error');
+        return;
+      }
+
+      const partsResponse = importPayload.parts.length
+        ? await importParts(importPayload.parts)
+        : { created: 0, updated: 0 };
+      const assetsResponse = importPayload.assets.length
+        ? await importAssets(importPayload.assets)
+        : { created: 0, updated: 0 };
+      const pmResponse = importPayload.preventiveMaintenances.length
+        ? await importPreventiveMaintenances(
+            importPayload.preventiveMaintenances
+          )
+        : { created: 0, updated: 0 };
       showSnackBar(
-        t('import_asset_success', {
-          created: response.created,
-          updated: response.updated
+        t('maintenance_kit_import_success', {
+          assetsCreated: assetsResponse.created,
+          assetsUpdated: assetsResponse.updated,
+          partsCreated: partsResponse.created,
+          partsUpdated: partsResponse.updated,
+          pmCreated: pmResponse.created,
+          pmUpdated: pmResponse.updated
         }),
         'success'
       );

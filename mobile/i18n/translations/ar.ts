@@ -1099,6 +1099,8 @@ const locale = {
   import_assets_from_excel: 'استيراد الأصول من Excel',
   asset_import_no_rows:
     'لم يتم العثور على صفوف أصول. استخدم قالب استيراد الأصول أو قالب صيانة FVV.',
+  maintenance_kit_import_success:
+    'اكتمل الاستيراد: الأصول {{assetsCreated}} إنشاء/{{assetsUpdated}} تحديث، قطع الغيار {{partsCreated}} إنشاء/{{partsUpdated}} تحديث، خطط الصيانة {{pmCreated}} إنشاء/{{pmUpdated}} تحديث',
   wo_calendar: 'تقويم أوامر العمل',
   month: 'شهر',
   week: 'أسبوع',
