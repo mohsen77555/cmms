@@ -1077,6 +1077,8 @@ const locale = {
   required_match: 'مطلوب مطابقة {{field}}',
   archived: 'مؤرشفة',
   import_wo_success: 'تم إنشاء أوامر العمل {{created}} وتم تحديث {{updated}}',
+  import_error: 'فشل الاستيراد',
+  import_partial_warning: 'تعذر استيراد بعض البيانات',
   to_export: 'تصدير',
   filters: 'المرشحات',
   more_filters: 'المزيد من المرشحات',

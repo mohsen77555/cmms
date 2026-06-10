@@ -40,6 +40,7 @@ import { parseMaintenanceKitImportWorkbook } from '../../utils/assetImport';
 import useAssetImport from '../../hooks/useAssetImport';
 import { CustomSnackBarContext } from '../../contexts/CustomSnackBarContext';
 import { PlanFeature } from '../../models/subscriptionPlan';
+import { getErrorMessage } from '../../utils/api';
 
 const AssetCard = ({
   asset,
@@ -268,31 +269,85 @@ export default function AssetsScreen({
         return;
       }
 
-      const partsResponse = importPayload.parts.length
-        ? await importParts(importPayload.parts)
-        : { created: 0, updated: 0 };
-      const assetsResponse = importPayload.assets.length
-        ? await importAssets(importPayload.assets)
-        : { created: 0, updated: 0 };
-      const pmResponse = importPayload.preventiveMaintenances.length
-        ? await importPreventiveMaintenances(
-            importPayload.preventiveMaintenances
-          )
-        : { created: 0, updated: 0 };
-      showSnackBar(
-        t('maintenance_kit_import_success', {
-          assetsCreated: assetsResponse.created,
-          assetsUpdated: assetsResponse.updated,
-          partsCreated: partsResponse.created,
-          partsUpdated: partsResponse.updated,
-          pmCreated: pmResponse.created,
-          pmUpdated: pmResponse.updated
-        }),
-        'success'
-      );
-      refreshAssets();
+      const importErrors: string[] = [];
+      const formatImportError = (label: string, err: unknown) =>
+        `${label}: ${getErrorMessage(err, t('import_error'))}`;
+      const partsResponse = { created: 0, updated: 0 };
+      const assetsResponse = { created: 0, updated: 0 };
+      const pmResponse = { created: 0, updated: 0 };
+
+      if (importPayload.parts.length) {
+        try {
+          Object.assign(partsResponse, await importParts(importPayload.parts));
+        } catch (err) {
+          importErrors.push(formatImportError(t('parts'), err));
+        }
+      }
+
+      if (importPayload.assets.length) {
+        try {
+          Object.assign(
+            assetsResponse,
+            await importAssets(importPayload.assets)
+          );
+        } catch (err) {
+          importErrors.push(formatImportError(t('assets'), err));
+        }
+      }
+
+      const assetImported =
+        assetsResponse.created + assetsResponse.updated > 0 ||
+        !importPayload.assets.length;
+      if (importPayload.preventiveMaintenances.length && assetImported) {
+        try {
+          Object.assign(
+            pmResponse,
+            await importPreventiveMaintenances(
+              importPayload.preventiveMaintenances
+            )
+          );
+        } catch (err) {
+          importErrors.push(formatImportError(t('maintenance_plans'), err));
+        }
+      }
+
+      const successMessage = t('maintenance_kit_import_success', {
+        assetsCreated: assetsResponse.created,
+        assetsUpdated: assetsResponse.updated,
+        partsCreated: partsResponse.created,
+        partsUpdated: partsResponse.updated,
+        pmCreated: pmResponse.created,
+        pmUpdated: pmResponse.updated
+      });
+      const importedSomething =
+        partsResponse.created +
+          partsResponse.updated +
+          assetsResponse.created +
+          assetsResponse.updated +
+          pmResponse.created +
+          pmResponse.updated >
+        0;
+
+      if (importedSomething) {
+        showSnackBar(
+          importErrors.length
+            ? `${successMessage}. ${t(
+                'import_partial_warning'
+              )}: ${importErrors.join(' | ')}`
+            : successMessage,
+          importErrors.length ? 'info' : 'success'
+        );
+        refreshAssets();
+      } else {
+        showSnackBar(
+          importErrors.length
+            ? `${t('import_error')}: ${importErrors.join(' | ')}`
+            : t('import_error'),
+          'error'
+        );
+      }
     } catch (err) {
-      showSnackBar(t('import_error'), 'error');
+      showSnackBar(getErrorMessage(err, t('import_error')), 'error');
     }
   };
 

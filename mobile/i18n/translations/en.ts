@@ -1129,6 +1129,8 @@ const locale = {
   archived: 'Archived',
   import_wo_success:
     '{{created}} Work Orders have been created and {{updated}} have been updated',
+  import_error: 'Import failed',
+  import_partial_warning: 'Some data could not be imported',
   to_export: 'Export',
   filters: 'Filters',
   more_filters: 'More Filters',

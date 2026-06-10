@@ -204,27 +204,38 @@ const parseFvvFrequency = (
   return { recurrenceType: 'monthly', frequency: 1, dueDateDelay: 7 };
 };
 
-const formatFvvParts = (rows: unknown[][]): PartImportDTO[] =>
-  rows
+const formatFvvParts = (rows: unknown[][]): PartImportDTO[] => {
+  const seenBarcodes = new Set<string>();
+  return rows
     .filter((row) => row[1] || row[2])
     .map((row) => {
       const code = String(row[1] ?? '').trim();
       const description = String(row[2] ?? '').trim();
       const stock = parseNumber(row[3]);
       const name = description || code;
+      const barcode = code && !seenBarcodes.has(code) ? code : '';
+      if (barcode) {
+        seenBarcodes.add(barcode);
+      }
       return {
         id: null,
         name,
-        barcode: code,
+        barcode,
         description,
         quantity: stock ?? 0,
         minQuantity: 0,
         nonStock: stock === undefined ? 'Yes' : 'No',
         category: 'FVV Spare Parts',
-        additionalInfos: `Position: ${row[0] ?? ''}`.trim()
+        additionalInfos: [
+          `Position: ${row[0] ?? ''}`.trim(),
+          code && !barcode ? `Original duplicate code: ${code}` : ''
+        ]
+          .filter(Boolean)
+          .join('\n')
       };
     })
     .filter((part) => !!part.name);
+};
 
 const formatFvvPreventiveMaintenances = (
   rows: unknown[][],
