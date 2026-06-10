@@ -22,6 +22,7 @@ import Category from './models/category';
 import { FilterField } from './models/page';
 import Request from './models/request';
 import Meter, { MeterMiniDTO } from './models/meter';
+import PreventiveMaintenance from './models/preventiveMaintenance';
 
 declare global {
   namespace ReactNavigation {
@@ -33,6 +34,7 @@ export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   AddWorkOrder: { location?: Location; asset?: AssetDTO };
   WorkOrderStats: undefined;
+  MaintenanceHub: undefined;
   EditWorkOrder: { workOrder: WorkOrder; tasks: Task[] };
   EditRequest: { request: Request };
   EditAsset: { asset: AssetDTO };
@@ -76,6 +78,10 @@ export type RootStackParamList = {
   TeamDetails: { id: number; teamProp?: Team };
   PartDetails: { id: number; partProp?: Part };
   MeterDetails: { id: number; meterProp?: Meter };
+  PreventiveMaintenanceDetails: {
+    id: number;
+    preventiveMaintenanceProp?: PreventiveMaintenance;
+  };
   CustomerDetails: { id: number; customerProp?: Customer };
   VendorDetails: { id: number; vendorProp?: Vendor };
   Modal: undefined;
@@ -143,6 +149,7 @@ export type RootStackParamList = {
   };
   NotFound: undefined;
   Meters: undefined;
+  PreventiveMaintenances: undefined;
   Parts: undefined;
   Locations: { id?: number; hierarchy?: number[] };
   Assets: { id?: number; hierarchy?: number[] };

@@ -5,8 +5,9 @@ export const googleMapsConfig = {
   apiKey: process.env.GOOGLE_KEY
 };
 
-// Default API URL from Expo config
-const defaultApiUrl = Constants.expoConfig.extra.API_URL;
+// Default API URL from Expo config, with the public Atlas API as a safe fallback.
+const defaultApiUrl =
+  Constants.expoConfig?.extra?.API_URL ?? 'https://api.atlas-cmms.com/';
 export const IS_LOCALHOST = false;
 
 // Function to get the API URL (either custom or default)

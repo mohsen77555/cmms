@@ -50,6 +50,9 @@ import Constants from 'expo-constants';
 import moment from 'moment-timezone';
 import { getCustomFields } from '../slices/customField';
 
+const AUTH_CACHE_KEY = 'cachedAuthState';
+export const PREFERRED_LANGUAGE_KEY = 'preferredLanguage';
+
 interface AuthState {
   isInitialized: boolean;
   isAuthenticated: boolean;
@@ -122,6 +125,7 @@ type InitializeAction = {
     user: UserResponseDTO | null;
     companySettings: CompanySettings | null;
     company: Company | null;
+    userSettings?: UserSettings | null;
   };
 };
 
@@ -131,6 +135,7 @@ type LoginAction = {
     user: UserResponseDTO;
     companySettings: CompanySettings;
     company: Company;
+    userSettings?: UserSettings | null;
   };
 };
 
@@ -144,6 +149,7 @@ type RegisterAction = {
     user: UserResponseDTO;
     companySettings: CompanySettings;
     company: Company;
+    userSettings?: UserSettings | null;
   };
 };
 type PatchUserSettingsAction = {
@@ -266,6 +272,7 @@ const setSession = (accessToken: string | null): void => {
   } else {
     AsyncStorage.removeItem('accessToken');
     AsyncStorage.removeItem('companyId');
+    AsyncStorage.removeItem(AUTH_CACHE_KEY);
   }
 };
 
@@ -273,12 +280,43 @@ const setCompanyId = (companyId: number) => {
   AsyncStorage.setItem('companyId', companyId.toString());
 };
 
+type CachedAuthState = Pick<
+  AuthState,
+  'user' | 'company' | 'companySettings' | 'userSettings'
+>;
+
+const cacheAuthState = async (snapshot: CachedAuthState) => {
+  if (snapshot.user && snapshot.company && snapshot.companySettings) {
+    await AsyncStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(snapshot));
+  }
+};
+
+const getCachedAuthState = async (): Promise<CachedAuthState | null> => {
+  try {
+    const cached = await AsyncStorage.getItem(AUTH_CACHE_KEY);
+    if (!cached) return null;
+    const parsed = JSON.parse(cached) as CachedAuthState;
+    if (parsed.user && parsed.company && parsed.companySettings) {
+      return parsed;
+    }
+  } catch (err) {
+    console.error('Failed to read cached auth state', err);
+  }
+  return null;
+};
+
+const getPreferredLanguage = async (fallback?: string) => {
+  const storedLanguage = await AsyncStorage.getItem(PREFERRED_LANGUAGE_KEY);
+  return (storedLanguage || fallback || 'en').toLowerCase();
+};
+
 const handlers: Record<
   string,
   (state: AuthState, action: Action) => AuthState
 > = {
   INITIALIZE: (state: AuthState, action: InitializeAction): AuthState => {
-    const { isAuthenticated, user, companySettings, company } = action.payload;
+    const { isAuthenticated, user, companySettings, company, userSettings } =
+      action.payload;
 
     return {
       ...state,
@@ -286,18 +324,20 @@ const handlers: Record<
       isInitialized: true,
       user,
       companySettings,
-      company
+      company,
+      userSettings: userSettings ?? null
     };
   },
   LOGIN: (state: AuthState, action: LoginAction): AuthState => {
-    const { user, companySettings, company } = action.payload;
+    const { user, companySettings, company, userSettings } = action.payload;
 
     return {
       ...state,
       isAuthenticated: true,
       user,
       companySettings,
-      company
+      company,
+      userSettings: userSettings ?? state.userSettings
     };
   },
   LOGOUT: (state: AuthState): AuthState => ({
@@ -306,14 +346,15 @@ const handlers: Record<
     user: null
   }),
   REGISTER: (state: AuthState, action: RegisterAction): AuthState => {
-    const { user, companySettings, company } = action.payload;
+    const { user, companySettings, company, userSettings } = action.payload;
 
     return {
       ...state,
       isAuthenticated: true,
       user,
       companySettings,
-      company
+      company,
+      userSettings: userSettings ?? state.userSettings
     };
   },
   PATCH_USER_SETTINGS: (
@@ -470,7 +511,10 @@ const handlers: Record<
     }
     return stateClone;
   },
-  REVIEW_ELIGIBLE: (state: AuthState, action: ReviewEligibleAction): AuthState => {
+  REVIEW_ELIGIBLE: (
+    state: AuthState,
+    action: ReviewEligibleAction
+  ): AuthState => {
     return {
       ...state,
       reviewEligible: action.payload
@@ -592,8 +636,8 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     registerStompClient();
     return disconnect;
   }, [state?.user?.id, state?.userSettings, stompClient]);
-  const switchLanguage = ({ lng }: { lng: any }) => {
-    internationalization.changeLanguage(lng);
+  const switchLanguage = async ({ lng }: { lng: any }) => {
+    internationalization.changeLanguage(await getPreferredLanguage(lng));
   };
   const updateUserInfos = async () => {
     const user = await getUserInfos();
@@ -677,7 +721,7 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
       api.post<{ success: boolean }>(`notifications/push-token`, { token });
   };
   const setupUser = async (companySettings: CompanySettings) => {
-    switchLanguage({
+    await switchLanguage({
       lng: companySettings.generalPreferences.language.toLowerCase()
     });
     checkPushNotificationState();
@@ -701,18 +745,47 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
       if (accessToken && (await verify(accessToken))) {
         setSession(accessToken);
-        const user = await updateUserInfos();
-        const company = await api.get<Company>(`companies/${user.companyId}`);
-        await setupUser(company.companySettings);
-        dispatch({
-          type: 'INITIALIZE',
-          payload: {
-            isAuthenticated: true,
+        try {
+          const user = await updateUserInfos();
+          const company = await api.get<Company>(`companies/${user.companyId}`);
+          await setupUser(company.companySettings);
+          await cacheAuthState({
             user,
             companySettings: company.companySettings,
-            company
+            company,
+            userSettings: state.userSettings
+          });
+          dispatch({
+            type: 'INITIALIZE',
+            payload: {
+              isAuthenticated: true,
+              user,
+              companySettings: company.companySettings,
+              company,
+              userSettings: state.userSettings
+            }
+          });
+        } catch (err) {
+          const cachedAuthState = await getCachedAuthState();
+          if (cachedAuthState) {
+            setCompanyId(cachedAuthState.user.companyId);
+            await switchLanguage({
+              lng: cachedAuthState.companySettings.generalPreferences.language.toLowerCase()
+            });
+            dispatch({
+              type: 'INITIALIZE',
+              payload: {
+                isAuthenticated: true,
+                user: cachedAuthState.user,
+                companySettings: cachedAuthState.companySettings,
+                company: cachedAuthState.company,
+                userSettings: cachedAuthState.userSettings
+              }
+            });
+          } else {
+            throw err;
           }
-        });
+        }
       } else {
         dispatch({
           type: 'INITIALIZE',
@@ -750,12 +823,19 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     const user = await updateUserInfos();
     const company = await api.get<Company>(`companies/${user.companyId}`);
     await setupUser(company.companySettings);
+    await cacheAuthState({
+      user,
+      companySettings: company.companySettings,
+      company,
+      userSettings: state.userSettings
+    });
     dispatch({
       type: 'LOGIN',
       payload: {
         user,
         companySettings: company.companySettings,
-        company
+        company,
+        userSettings: state.userSettings
       }
     });
   };
@@ -819,12 +899,19 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
         lastName: values.lastName,
         employeesCount: values.employeesCount
       });
+      await cacheAuthState({
+        user,
+        companySettings: company.companySettings,
+        company,
+        userSettings: state.userSettings
+      });
       dispatch({
         type: 'REGISTER',
         payload: {
           user,
           companySettings: company.companySettings,
-          company
+          company,
+          userSettings: state.userSettings
         }
       });
     }
@@ -917,19 +1004,45 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     return success;
   };
   const fetchUserSettings = async (): Promise<void> => {
-    const userSettings = await getUserSettings(state.user.userSettingsId);
-    dispatch({
-      type: 'GET_USER_SETTINGS',
-      payload: {
+    try {
+      const userSettings = await getUserSettings(state.user.userSettingsId);
+      await cacheAuthState({
+        user: state.user,
+        company: state.company,
+        companySettings: state.companySettings,
         userSettings
+      });
+      dispatch({
+        type: 'GET_USER_SETTINGS',
+        payload: {
+          userSettings
+        }
+      });
+    } catch (err) {
+      const cachedAuthState = await getCachedAuthState();
+      if (cachedAuthState?.userSettings) {
+        dispatch({
+          type: 'GET_USER_SETTINGS',
+          payload: {
+            userSettings: cachedAuthState.userSettings
+          }
+        });
+        return;
       }
-    });
+      throw err;
+    }
   };
 
   const fetchCompanySettings = async (): Promise<void> => {
     const companySettings = await getCompanySettings(
       state.user.companySettingsId
     );
+    await cacheAuthState({
+      user: state.user,
+      company: state.company,
+      companySettings,
+      userSettings: state.userSettings
+    });
     dispatch({
       type: 'GET_COMPANY_SETTINGS',
       payload: {
@@ -939,6 +1052,12 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
   };
   const fetchCompany = async (): Promise<void> => {
     const company = await api.get<Company>(`company/${state.user.companyId}`);
+    await cacheAuthState({
+      user: state.user,
+      company,
+      companySettings: company.companySettings,
+      userSettings: state.userSettings
+    });
     dispatch({
       type: 'GET_COMPANY',
       payload: {
@@ -953,6 +1072,16 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
       `general-preferences/${state.companySettings.generalPreferences.id}`,
       { ...state.companySettings.generalPreferences, ...values }
     );
+    const companySettings = {
+      ...state.companySettings,
+      generalPreferences
+    };
+    await cacheAuthState({
+      user: state.user,
+      company: state.company,
+      companySettings,
+      userSettings: state.userSettings
+    });
     dispatch({
       type: 'PATCH_GENERAL_PREFERENCES',
       payload: {
@@ -1162,6 +1291,9 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     });
   };
   useEffect(() => {
+    getPreferredLanguage().then((language) =>
+      internationalization.changeLanguage(language)
+    );
     getInfos();
   }, []);
 

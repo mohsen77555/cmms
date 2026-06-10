@@ -22,12 +22,15 @@ import { TabBar, TabView } from 'react-native-tab-view';
 import AssetWorkOrders from './AssetWorkOrders';
 import AssetFiles from './AssetFiles';
 import AssetParts from './AssetParts';
+import AssetMeters from './AssetMeters';
 import { CustomSnackBarContext } from '../../../contexts/CustomSnackBarContext';
+import { parseExcelImportInfo } from '../../../utils/excelImportInfo';
+import AssetExcelSection from './AssetExcelSection';
 
 export default function AssetDetailsHome({
-                                           navigation,
-                                           route
-                                         }: RootStackScreenProps<'AssetDetails'>) {
+  navigation,
+  route
+}: RootStackScreenProps<'AssetDetails'>) {
   const { id, assetProp } = route.params;
 
   const { t } = useTranslation();
@@ -39,13 +42,25 @@ export default function AssetDetailsHome({
   const [tabIndex, setTabIndex] = useState(0);
   const [openDelete, setOpenDelete] = useState<boolean>(false);
   const { showSnackBar } = useContext(CustomSnackBarContext);
-  const [tabs] = useState([
+  const excelImportInfo = parseExcelImportInfo(asset?.additionalInfos);
+  const tabs = [
     { key: 'details', title: t('details') },
     { key: 'work-orders', title: t('work_orders') },
     { key: 'files', title: t('files') },
-    { key: 'parts', title: t('parts') }
-  ]);
+    { key: 'parts', title: t('parts') },
+    { key: 'meters', title: t('meters') },
+    ...(excelImportInfo?.sections.map((section, index) => ({
+      key: `excel-${index}`,
+      title: section.sheetName.replace(/^\d+[-_\s]*/, '').slice(0, 18),
+      sectionIndex: index
+    })) ?? [])
+  ];
   const renderScene = ({ route, jumpTo }) => {
+    if (route.key?.startsWith('excel-')) {
+      const section = excelImportInfo?.sections[route.sectionIndex];
+      return section ? <AssetExcelSection section={section} /> : null;
+    }
+
     switch (route.key) {
       case 'details':
         return <AssetDetails asset={asset} navigation={navigation} />;
@@ -55,6 +70,8 @@ export default function AssetDetailsHome({
         return <AssetFiles asset={asset} />;
       case 'parts':
         return <AssetParts asset={asset} navigation={navigation} />;
+      case 'meters':
+        return <AssetMeters asset={asset} navigation={navigation} />;
     }
   };
   const renderTabBar = (props) => (
@@ -67,9 +84,13 @@ export default function AssetDetailsHome({
   );
 
   useEffect(() => {
-    if (!assetProp)
-      dispatch(getAssetDetails(id));
+    if (!assetProp) dispatch(getAssetDetails(id));
   }, [assetProp]);
+  useEffect(() => {
+    if (tabIndex >= tabs.length) {
+      setTabIndex(0);
+    }
+  }, [tabs.length, tabIndex]);
   useEffect(() => {
     navigation.setOptions({
       title: asset?.name ?? t('loading'),
@@ -89,7 +110,7 @@ export default function AssetDetailsHome({
             });
           }}
         >
-          <IconButton icon='dots-vertical' />
+          <IconButton icon="dots-vertical" />
         </Pressable>
       )
     });
@@ -114,7 +135,7 @@ export default function AssetDetailsHome({
         <Dialog visible={openDelete} onDismiss={() => setOpenDelete(false)}>
           <Dialog.Title>{t('confirmation')}</Dialog.Title>
           <Dialog.Content>
-            <Text variant='bodyMedium'>{t('confirm_delete_asset')}</Text>
+            <Text variant="bodyMedium">{t('confirm_delete_asset')}</Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setOpenDelete(false)}>{t('cancel')}</Button>

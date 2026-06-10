@@ -326,6 +326,19 @@ const locale = {
   ends_on: 'Ends On',
   frequency: 'Frequency',
   every_frequency_days: 'Every {{frequency}} days',
+  maintenance_plans: 'Maintenance Plans',
+  maintenance_plan_details: 'Maintenance Plan Details',
+  maintenance_plan_overview: 'Maintenance plan scheduling overview',
+  maintenance_plan_overview_description:
+    'Review preventive maintenance plans, next due dates, and generated maintenance orders.',
+  no_maintenance_plans: 'No maintenance plans found',
+  view_generated_orders: 'View generated work orders',
+  scheduling_overview: 'Scheduling Overview',
+  next_due_date: 'Next Due Date',
+  technical_object: 'Technical Object',
+  functional_location: 'Functional Location',
+  active: 'Active',
+  disabled: 'Disabled',
   wo_details: 'Work Order details',
   confirm_delete_file: 'Are you sure you want to remove this file?',
   wo_schedule_success: 'Work Order successfully scheduled',
@@ -655,6 +668,11 @@ const locale = {
   meter_delete_success: 'The meter has been deleted successfully',
   meter_delete_failure: "The meter couldn't be deleted",
   next_reading_due: 'Next Reading Due',
+  asset_meters: 'Asset meters',
+  asset_meters_description:
+    'Track usage and condition readings for this asset.',
+  no_meters_linked_asset: 'No meters linked to this asset',
+  refresh: 'Refresh',
   unit_of_measurement: 'Unit of Measurement',
   last_reading: 'Last Reading',
   enter_meter_name: 'Enter Meter name',
@@ -1116,6 +1134,8 @@ const locale = {
   archived: 'Archived',
   import_wo_success:
     '{{created}} Work Orders have been created and {{updated}} have been updated',
+  import_error: 'Import failed',
+  import_partial_warning: 'Some data could not be imported',
   to_export: 'Export',
   filters: 'Filters',
   more_filters: 'More Filters',
@@ -1137,6 +1157,92 @@ const locale = {
     '{{created}} Meters have been created and {{updated}} have been updated',
   import_asset_success:
     '{{created}} Assets have been created and {{updated}} have been updated',
+  import_assets_from_excel: 'Import assets from Excel',
+  asset_import_no_rows:
+    'No asset rows were found. Please use the asset import template or the FVV maintenance kit format.',
+  maintenance_kit_import_success:
+    'Import complete: assets {{assetsCreated}} created/{{assetsUpdated}} updated, spare parts {{partsCreated}} created/{{partsUpdated}} updated, maintenance plans {{pmCreated}} created/{{pmUpdated}} updated',
+  excel_imported_sections: 'Imported Excel sections',
+  excel_sections_as_tabs:
+    'Imported Excel sheets are available as separate tabs on this asset.',
+  search_excel_fields: 'Search imported Excel fields',
+  excel_row: 'Row',
+  smart_governance: 'Smart governance',
+  smart_governance_description:
+    'Automatic quality and relationship checks for the imported maintenance kit.',
+  excel_sheets: 'Sheets',
+  excel_rows: 'Rows',
+  excel_fields: 'Fields',
+  data_completeness: 'Data completeness',
+  technical_data: 'Technical data',
+  spare_parts: 'Spare parts',
+  troubleshooting: 'Troubleshooting',
+  safety: 'Safety',
+  available: 'Available',
+  missing: 'Missing',
+  planned: 'Planned',
+  maintenance_hub: 'Maintenance Hub',
+  maintenance_overview_short: 'Overview',
+  maintenance_organization_short: 'Organization',
+  maintenance_chapter_1: '1. Maintenance Overview',
+  maintenance_chapter_2: '2. Maintenance Organization',
+  maintenance_chapter_3: '3. Assets',
+  maintenance_chapter_4: '4. Asset Groups',
+  maintenance_chapter_5: '5. Meters for Assets',
+  maintenance_chapter_6: '6. Supplier Warranty',
+  maintenance_chapter_7: '7. Standard Operations',
+  maintenance_chapter_1_summary:
+    'Dashboard, work orders, execution, reports, exceptions, imports, and integrations.',
+  maintenance_chapter_2_summary:
+    'Work areas, work centers, resources, resource instances, shifts, and calendars.',
+  maintenance_chapter_3_summary:
+    'Asset registry, hierarchy, parts list, imported Excel sheets, history, and IoT-ready data.',
+  maintenance_chapter_4_summary:
+    'Asset group rules, groups, assignments, validation, and automatic end dating.',
+  maintenance_chapter_5_summary:
+    'Asset meters, readings, reading history, reset/rollover, forecasts, and IoT/import foundations.',
+  maintenance_chapter_6_summary:
+    'Supplier warranty coverages, contracts, entitlements, claims, and reimbursement tracking.',
+  maintenance_chapter_7_summary:
+    'Reusable maintenance standard operations, resources, attachments, and repair coding.',
+  maintenance_action_work_orders: 'Manage and execute maintenance work orders.',
+  maintenance_action_stats: 'Review maintenance KPIs and work order analytics.',
+  maintenance_action_requests: 'Manage maintenance notifications and requests.',
+  maintenance_action_people_teams:
+    'Manage technicians, supervisors, and teams.',
+  maintenance_action_work_areas:
+    'Use locations as work areas and functional locations.',
+  maintenance_resources: 'Maintenance Resources',
+  maintenance_action_resources_planned:
+    'Dedicated labor/equipment resource setup is planned from Chapter 2.',
+  maintenance_action_assets: 'Open the asset registry and asset hierarchy.',
+  maintenance_action_asset_import:
+    'Upload Excel maintenance kits or asset import spreadsheets.',
+  maintenance_action_asset_meters: 'Review meters linked directly to assets.',
+  asset_groups: 'Asset Groups',
+  asset_group_rules: 'Asset Group Rules',
+  maintenance_action_asset_group_rules:
+    'Rule-based grouping is planned from Chapter 4.',
+  maintenance_action_asset_groups:
+    'Asset group assignment UI is planned from Chapter 4.',
+  meter_templates: 'Meter Templates',
+  maintenance_action_meters: 'Manage asset meters and reading history.',
+  maintenance_action_meter_templates:
+    'Reusable meter templates are planned from Chapter 5.',
+  maintenance_action_reading_history:
+    'Open meter records to review and add readings.',
+  supplier_warranty: 'Supplier Warranty',
+  warranty_contracts: 'Warranty Contracts',
+  warranty_claims: 'Warranty Claims',
+  maintenance_action_warranty_contracts:
+    'Warranty contract management is planned from Chapter 6.',
+  maintenance_action_warranty_claims:
+    'Warranty claims and reimbursement tracking are planned from Chapter 6.',
+  standard_operations: 'Standard Operations',
+  maintenance_action_checklists:
+    'Existing checklists cover reusable execution steps today.',
+  maintenance_action_standard_operations:
+    'Dedicated standard operations are planned from Chapter 7.',
   wo_calendar: 'Work Orders Calendar',
   month: 'Month',
   week: 'Week',
@@ -1464,6 +1570,9 @@ const locale = {
   server_url_saved: 'Server URL successfully saved',
   error_saving_url: 'Error occurred while saving the Server URL',
   server_url_reset: 'Server URL reset to default',
+  language_saved: 'Language successfully saved',
+  language_saved_offline:
+    'Language saved on this device and will sync when you are online',
   reset_to_default: 'Reset to default',
   list: 'List',
   back_to: 'Back to',

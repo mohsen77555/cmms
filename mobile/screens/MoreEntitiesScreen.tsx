@@ -24,6 +24,17 @@ export default function MoreEntitiesScreen({
     uiConfigKey?: keyof UiConfiguration;
   }[] = [
     {
+      label: 'maintenance_hub',
+      icon: 'view-dashboard-outline',
+      color: '#5569ff',
+      backgroundColor: '#d8dcff',
+      link: 'MaintenanceHub',
+      visible:
+        hasViewPermission(PermissionEntity.WORK_ORDERS) ||
+        hasViewPermission(PermissionEntity.ASSETS) ||
+        hasViewPermission(PermissionEntity.METERS)
+    },
+    {
       label: 'locations',
       icon: 'map-marker',
       color: '#2491d1',
@@ -57,6 +68,14 @@ export default function MoreEntitiesScreen({
       link: 'Meters',
       visible: hasViewPermission(PermissionEntity.METERS),
       uiConfigKey: 'meters'
+    },
+    {
+      label: 'maintenance_plans',
+      icon: 'calendar-sync',
+      color: '#1f9d55',
+      backgroundColor: '#c8d3cc',
+      link: 'PreventiveMaintenances',
+      visible: hasViewPermission(PermissionEntity.PREVENTIVE_MAINTENANCES)
     },
     {
       label: 'people_teams',

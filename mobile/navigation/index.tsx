@@ -32,6 +32,7 @@ import CreateLocationScreen from '../screens/locations/CreateLocationScreen';
 import CreateMeterScreen from '../screens/meters/CreateMeterScreen';
 import CreatePartScreen from '../screens/parts/CreatePartScreen';
 import WorkOrderStatsScreen from '../screens/WorkOrderStatsScreen';
+import MaintenanceHubScreen from '../screens/maintenance/MaintenanceHubScreen';
 import {
   AuthStackParamList,
   RootStackParamList,
@@ -46,6 +47,8 @@ import { IconButton, Text, useTheme } from 'react-native-paper';
 import { IconSource } from 'react-native-paper/lib/typescript/components/Icon';
 import MoreEntitiesScreen from '../screens/MoreEntitiesScreen';
 import MetersScreen from '../screens/meters/MetersScreen';
+import PreventiveMaintenancesScreen from '../screens/preventiveMaintenance/PreventiveMaintenancesScreen';
+import PreventiveMaintenanceDetailsScreen from '../screens/preventiveMaintenance/PreventiveMaintenanceDetailsScreen';
 import WorkOrdersScreen from '../screens/workOrders/WorkOrdersScreen';
 import { SheetManager } from 'react-native-actions-sheet';
 import CompleteWorkOrderModal from '../screens/workOrders/CompleteWorkOrderModal';
@@ -212,9 +215,24 @@ function RootNavigator() {
         options={{ title: t('stats') }}
       />
       <Stack.Screen
+        name="MaintenanceHub"
+        component={MaintenanceHubScreen}
+        options={{ title: t('maintenance_hub') }}
+      />
+      <Stack.Screen
         name="Meters"
         component={MetersScreen}
         options={{ title: t('meters') }}
+      />
+      <Stack.Screen
+        name="PreventiveMaintenances"
+        component={PreventiveMaintenancesScreen}
+        options={{ title: t('maintenance_plans') }}
+      />
+      <Stack.Screen
+        name="PreventiveMaintenanceDetails"
+        component={PreventiveMaintenanceDetailsScreen}
+        options={{ title: t('maintenance_plan_details') }}
       />
       <Stack.Screen
         name="MeterDetails"
@@ -254,7 +272,10 @@ function RootNavigator() {
       <Stack.Screen
         name="VendorsCustomers"
         component={VendorsAndCustomersScreen}
-        options={{ title: t('vendors_and_customers'), contentStyle: Platform.OS === 'ios' ? { paddingTop: 10 } : undefined }}
+        options={{
+          title: t('vendors_and_customers'),
+          contentStyle: Platform.OS === 'ios' ? { paddingTop: 10 } : undefined
+        }}
       />
       <Stack.Screen
         name="CustomerDetails"
@@ -309,7 +330,10 @@ function RootNavigator() {
       <Stack.Screen
         name="PeopleTeams"
         component={PeopleAndTeamsScreen}
-        options={{ title: t('people_teams'), contentStyle: Platform.OS === 'ios' ? { paddingTop: 10 } : undefined }}
+        options={{
+          title: t('people_teams'),
+          contentStyle: Platform.OS === 'ios' ? { paddingTop: 10 } : undefined
+        }}
       />
       <Stack.Screen
         name="TeamDetails"
