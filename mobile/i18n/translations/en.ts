@@ -1180,6 +1180,69 @@ const locale = {
   safety: 'Safety',
   available: 'Available',
   missing: 'Missing',
+  planned: 'Planned',
+  maintenance_hub: 'Maintenance Hub',
+  maintenance_overview_short: 'Overview',
+  maintenance_organization_short: 'Organization',
+  maintenance_chapter_1: '1. Maintenance Overview',
+  maintenance_chapter_2: '2. Maintenance Organization',
+  maintenance_chapter_3: '3. Assets',
+  maintenance_chapter_4: '4. Asset Groups',
+  maintenance_chapter_5: '5. Meters for Assets',
+  maintenance_chapter_6: '6. Supplier Warranty',
+  maintenance_chapter_7: '7. Standard Operations',
+  maintenance_chapter_1_summary:
+    'Dashboard, work orders, execution, reports, exceptions, imports, and integrations.',
+  maintenance_chapter_2_summary:
+    'Work areas, work centers, resources, resource instances, shifts, and calendars.',
+  maintenance_chapter_3_summary:
+    'Asset registry, hierarchy, parts list, imported Excel sheets, history, and IoT-ready data.',
+  maintenance_chapter_4_summary:
+    'Asset group rules, groups, assignments, validation, and automatic end dating.',
+  maintenance_chapter_5_summary:
+    'Asset meters, readings, reading history, reset/rollover, forecasts, and IoT/import foundations.',
+  maintenance_chapter_6_summary:
+    'Supplier warranty coverages, contracts, entitlements, claims, and reimbursement tracking.',
+  maintenance_chapter_7_summary:
+    'Reusable maintenance standard operations, resources, attachments, and repair coding.',
+  maintenance_action_work_orders: 'Manage and execute maintenance work orders.',
+  maintenance_action_stats: 'Review maintenance KPIs and work order analytics.',
+  maintenance_action_requests: 'Manage maintenance notifications and requests.',
+  maintenance_action_people_teams:
+    'Manage technicians, supervisors, and teams.',
+  maintenance_action_work_areas:
+    'Use locations as work areas and functional locations.',
+  maintenance_resources: 'Maintenance Resources',
+  maintenance_action_resources_planned:
+    'Dedicated labor/equipment resource setup is planned from Chapter 2.',
+  maintenance_action_assets: 'Open the asset registry and asset hierarchy.',
+  maintenance_action_asset_import:
+    'Upload Excel maintenance kits or asset import spreadsheets.',
+  maintenance_action_asset_meters: 'Review meters linked directly to assets.',
+  asset_groups: 'Asset Groups',
+  asset_group_rules: 'Asset Group Rules',
+  maintenance_action_asset_group_rules:
+    'Rule-based grouping is planned from Chapter 4.',
+  maintenance_action_asset_groups:
+    'Asset group assignment UI is planned from Chapter 4.',
+  meter_templates: 'Meter Templates',
+  maintenance_action_meters: 'Manage asset meters and reading history.',
+  maintenance_action_meter_templates:
+    'Reusable meter templates are planned from Chapter 5.',
+  maintenance_action_reading_history:
+    'Open meter records to review and add readings.',
+  supplier_warranty: 'Supplier Warranty',
+  warranty_contracts: 'Warranty Contracts',
+  warranty_claims: 'Warranty Claims',
+  maintenance_action_warranty_contracts:
+    'Warranty contract management is planned from Chapter 6.',
+  maintenance_action_warranty_claims:
+    'Warranty claims and reimbursement tracking are planned from Chapter 6.',
+  standard_operations: 'Standard Operations',
+  maintenance_action_checklists:
+    'Existing checklists cover reusable execution steps today.',
+  maintenance_action_standard_operations:
+    'Dedicated standard operations are planned from Chapter 7.',
   wo_calendar: 'Work Orders Calendar',
   month: 'Month',
   week: 'Week',

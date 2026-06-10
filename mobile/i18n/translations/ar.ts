@@ -1125,6 +1125,65 @@ const locale = {
   safety: 'السلامة',
   available: 'متوفر',
   missing: 'ناقص',
+  planned: 'مخطط',
+  maintenance_hub: 'مركز الصيانة',
+  maintenance_overview_short: 'نظرة عامة',
+  maintenance_organization_short: 'المنظمة',
+  maintenance_chapter_1: '1. النظرة العامة للصيانة',
+  maintenance_chapter_2: '2. منظمة الصيانة',
+  maintenance_chapter_3: '3. الأصول',
+  maintenance_chapter_4: '4. مجموعات الأصول',
+  maintenance_chapter_5: '5. عدادات الأصول',
+  maintenance_chapter_6: '6. ضمان المورد',
+  maintenance_chapter_7: '7. العمليات القياسية',
+  maintenance_chapter_1_summary:
+    'لوحة الإدارة، أوامر العمل، التنفيذ، التقارير، الاستثناءات، الاستيراد، والتكاملات.',
+  maintenance_chapter_2_summary:
+    'مناطق العمل، مراكز العمل، الموارد، نسخ الموارد، الورديات، والتقويمات.',
+  maintenance_chapter_3_summary:
+    'سجل الأصول، الهيكل، قائمة قطع الغيار، أوراق Excel المستوردة، التاريخ، وبيانات جاهزة للتكامل.',
+  maintenance_chapter_4_summary:
+    'قواعد مجموعات الأصول، المجموعات، الإسنادات، التحقق، والانتهاء التلقائي.',
+  maintenance_chapter_5_summary:
+    'عدادات الأصول، القراءات، تاريخ القراءات، reset/rollover، التوقعات، وأساس الاستيراد/IoT.',
+  maintenance_chapter_6_summary:
+    'تغطيات الضمان، العقود، الاستحقاقات، المطالبات، وتتبع التعويض.',
+  maintenance_chapter_7_summary:
+    'عمليات صيانة قياسية قابلة لإعادة الاستخدام، الموارد، المرفقات، وأكواد الإصلاح.',
+  maintenance_action_work_orders: 'إدارة وتنفيذ أوامر الصيانة.',
+  maintenance_action_stats: 'مراجعة مؤشرات الصيانة وتحليلات أوامر العمل.',
+  maintenance_action_requests: 'إدارة بلاغات وطلبات الصيانة.',
+  maintenance_action_people_teams: 'إدارة الفنيين والمشرفين والفرق.',
+  maintenance_action_work_areas: 'استخدام المواقع كمناطق عمل ومواقع فنية.',
+  maintenance_resources: 'موارد الصيانة',
+  maintenance_action_resources_planned:
+    'إعداد موارد العمالة والمعدات مخصص لاحقًا حسب الفصل 2.',
+  maintenance_action_assets: 'فتح سجل الأصول والتسلسل الهرمي.',
+  maintenance_action_asset_import: 'رفع ملفات Excel للأصول وملفات الصيانة.',
+  maintenance_action_asset_meters: 'مراجعة العدادات المرتبطة مباشرة بالأصول.',
+  asset_groups: 'مجموعات الأصول',
+  asset_group_rules: 'قواعد مجموعات الأصول',
+  maintenance_action_asset_group_rules:
+    'تجميع الأصول بالقواعد مخطط حسب الفصل 4.',
+  maintenance_action_asset_groups:
+    'واجهة إسناد الأصول للمجموعات مخططة حسب الفصل 4.',
+  meter_templates: 'قوالب العدادات',
+  maintenance_action_meters: 'إدارة عدادات الأصول وتاريخ القراءات.',
+  maintenance_action_meter_templates:
+    'قوالب العدادات القابلة لإعادة الاستخدام مخططة حسب الفصل 5.',
+  maintenance_action_reading_history:
+    'فتح سجلات العدادات لمراجعة وإضافة القراءات.',
+  supplier_warranty: 'ضمان المورد',
+  warranty_contracts: 'عقود الضمان',
+  warranty_claims: 'مطالبات الضمان',
+  maintenance_action_warranty_contracts: 'إدارة عقود الضمان مخططة حسب الفصل 6.',
+  maintenance_action_warranty_claims:
+    'مطالبات الضمان وتتبع التعويض مخطط حسب الفصل 6.',
+  standard_operations: 'العمليات القياسية',
+  maintenance_action_checklists:
+    'قوائم التحقق الحالية تغطي خطوات التنفيذ القابلة لإعادة الاستخدام.',
+  maintenance_action_standard_operations:
+    'وحدة العمليات القياسية المخصصة مخططة حسب الفصل 7.',
   wo_calendar: 'تقويم أوامر العمل',
   month: 'شهر',
   week: 'أسبوع',

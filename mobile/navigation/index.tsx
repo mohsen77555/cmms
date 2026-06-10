@@ -32,6 +32,7 @@ import CreateLocationScreen from '../screens/locations/CreateLocationScreen';
 import CreateMeterScreen from '../screens/meters/CreateMeterScreen';
 import CreatePartScreen from '../screens/parts/CreatePartScreen';
 import WorkOrderStatsScreen from '../screens/WorkOrderStatsScreen';
+import MaintenanceHubScreen from '../screens/maintenance/MaintenanceHubScreen';
 import {
   AuthStackParamList,
   RootStackParamList,
@@ -212,6 +213,11 @@ function RootNavigator() {
         name="WorkOrderStats"
         component={WorkOrderStatsScreen}
         options={{ title: t('stats') }}
+      />
+      <Stack.Screen
+        name="MaintenanceHub"
+        component={MaintenanceHubScreen}
+        options={{ title: t('maintenance_hub') }}
       />
       <Stack.Screen
         name="Meters"

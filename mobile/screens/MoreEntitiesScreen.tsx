@@ -24,6 +24,17 @@ export default function MoreEntitiesScreen({
     uiConfigKey?: keyof UiConfiguration;
   }[] = [
     {
+      label: 'maintenance_hub',
+      icon: 'view-dashboard-outline',
+      color: '#5569ff',
+      backgroundColor: '#d8dcff',
+      link: 'MaintenanceHub',
+      visible:
+        hasViewPermission(PermissionEntity.WORK_ORDERS) ||
+        hasViewPermission(PermissionEntity.ASSETS) ||
+        hasViewPermission(PermissionEntity.METERS)
+    },
+    {
       label: 'locations',
       icon: 'map-marker',
       color: '#2491d1',

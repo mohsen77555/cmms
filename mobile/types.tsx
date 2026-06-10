@@ -34,6 +34,7 @@ export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   AddWorkOrder: { location?: Location; asset?: AssetDTO };
   WorkOrderStats: undefined;
+  MaintenanceHub: undefined;
   EditWorkOrder: { workOrder: WorkOrder; tasks: Task[] };
   EditRequest: { request: Request };
   EditAsset: { asset: AssetDTO };
