@@ -668,6 +668,11 @@ const locale = {
   meter_delete_success: 'The meter has been deleted successfully',
   meter_delete_failure: "The meter couldn't be deleted",
   next_reading_due: 'Next Reading Due',
+  asset_meters: 'Asset meters',
+  asset_meters_description:
+    'Track usage and condition readings for this asset.',
+  no_meters_linked_asset: 'No meters linked to this asset',
+  refresh: 'Refresh',
   unit_of_measurement: 'Unit of Measurement',
   last_reading: 'Last Reading',
   enter_meter_name: 'Enter Meter name',

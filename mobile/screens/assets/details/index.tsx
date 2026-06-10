@@ -22,6 +22,7 @@ import { TabBar, TabView } from 'react-native-tab-view';
 import AssetWorkOrders from './AssetWorkOrders';
 import AssetFiles from './AssetFiles';
 import AssetParts from './AssetParts';
+import AssetMeters from './AssetMeters';
 import { CustomSnackBarContext } from '../../../contexts/CustomSnackBarContext';
 import { parseExcelImportInfo } from '../../../utils/excelImportInfo';
 import AssetExcelSection from './AssetExcelSection';
@@ -47,6 +48,7 @@ export default function AssetDetailsHome({
     { key: 'work-orders', title: t('work_orders') },
     { key: 'files', title: t('files') },
     { key: 'parts', title: t('parts') },
+    { key: 'meters', title: t('meters') },
     ...(excelImportInfo?.sections.map((section, index) => ({
       key: `excel-${index}`,
       title: section.sheetName.replace(/^\d+[-_\s]*/, '').slice(0, 18),
@@ -68,6 +70,8 @@ export default function AssetDetailsHome({
         return <AssetFiles asset={asset} />;
       case 'parts':
         return <AssetParts asset={asset} navigation={navigation} />;
+      case 'meters':
+        return <AssetMeters asset={asset} navigation={navigation} />;
     }
   };
   const renderTabBar = (props) => (
