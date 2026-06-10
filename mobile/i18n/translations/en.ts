@@ -1158,7 +1158,10 @@ const locale = {
   maintenance_kit_import_success:
     'Import complete: assets {{assetsCreated}} created/{{assetsUpdated}} updated, spare parts {{partsCreated}} created/{{partsUpdated}} updated, maintenance plans {{pmCreated}} created/{{pmUpdated}} updated',
   excel_imported_sections: 'Imported Excel sections',
+  excel_sections_as_tabs:
+    'Imported Excel sheets are available as separate tabs on this asset.',
   search_excel_fields: 'Search imported Excel fields',
+  excel_row: 'Row',
   smart_governance: 'Smart governance',
   smart_governance_description:
     'Automatic quality and relationship checks for the imported maintenance kit.',

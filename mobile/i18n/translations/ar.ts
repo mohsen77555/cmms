@@ -1104,7 +1104,10 @@ const locale = {
   maintenance_kit_import_success:
     'اكتمل الاستيراد: الأصول {{assetsCreated}} إنشاء/{{assetsUpdated}} تحديث، قطع الغيار {{partsCreated}} إنشاء/{{partsUpdated}} تحديث، خطط الصيانة {{pmCreated}} إنشاء/{{pmUpdated}} تحديث',
   excel_imported_sections: 'أقسام Excel المستوردة',
+  excel_sections_as_tabs:
+    'أوراق Excel المستوردة متاحة كتبويبات مستقلة داخل هذا الأصل.',
   search_excel_fields: 'بحث في حقول Excel المستوردة',
+  excel_row: 'صف',
   smart_governance: 'الحوكمة الذكية',
   smart_governance_description:
     'فحص تلقائي لجودة وترابط بيانات ملف الصيانة المستورد.',

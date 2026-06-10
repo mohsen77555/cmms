@@ -1,18 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { AssetDTO as Asset } from '../../../models/asset';
 import * as React from 'react';
-import { useContext, useMemo, useState } from 'react';
+import { useContext } from 'react';
 import { CompanySettingsContext } from '../../../contexts/CompanySettingsContext';
 import { Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { View } from '../../../components/Themed';
-import {
-  Card,
-  Divider,
-  IconButton,
-  Searchbar,
-  Text,
-  useTheme
-} from 'react-native-paper';
+import { Card, Divider, Text, useTheme } from 'react-native-paper';
 import { UserMiniDTO } from '../../../models/user';
 import { Customer } from '../../../models/customer';
 import { Vendor } from '../../../models/vendor';
@@ -27,101 +20,9 @@ import ListField from '../../../components/ListField';
 import BasicField from '../../../components/BasicField';
 import { getCustomFieldValuesForDetails } from '../../../models/form';
 import {
-  ExcelImportSection,
   ExcelImportInfo,
   parseExcelImportInfo
 } from '../../../utils/excelImportInfo';
-
-const ExcelSection = ({ section }: { section: ExcelImportSection }) => {
-  const [expanded, setExpanded] = useState(false);
-  const visibleRows = expanded ? section.rows : section.rows.slice(0, 3);
-
-  return (
-    <Card style={styles.excelSection}>
-      <TouchableOpacity
-        onPress={() => setExpanded((value) => !value)}
-        style={styles.excelSectionHeader}
-      >
-        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-          <Text variant="titleMedium" style={styles.excelSectionTitle}>
-            {section.sheetName}
-          </Text>
-          <Text variant="bodySmall">
-            {section.rows.length} rows / {section.headers.length} columns
-          </Text>
-        </View>
-        <IconButton icon={expanded ? 'chevron-up' : 'chevron-down'} />
-      </TouchableOpacity>
-      {visibleRows.map((row, rowIndex) => {
-        const rowLabel = row[0] && section.headers.length > 2 ? row[0] : '';
-        return (
-          <View
-            key={`${section.sheetName}-${rowIndex}`}
-            style={styles.excelRow}
-          >
-            {!!rowLabel && (
-              <Text variant="titleSmall" style={styles.excelRowTitle}>
-                {rowLabel}
-              </Text>
-            )}
-            {section.headers.map((header, index) => {
-              const value = row[index];
-              if (!value) return null;
-              const label =
-                section.headers.length === 2 && index === 1 && row[0]
-                  ? row[0]
-                  : header;
-              if (section.headers.length === 2 && index === 0 && row[1]) {
-                return null;
-              }
-              return (
-                <View key={`${header}-${index}`} style={styles.excelCell}>
-                  <Text variant="bodySmall" style={styles.excelHeader}>
-                    {label}
-                  </Text>
-                  <Text variant="bodyMedium" style={styles.excelValue}>
-                    {value}
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
-        );
-      })}
-    </Card>
-  );
-};
-
-const normalize = (value: string) => value.toLowerCase().trim();
-
-const filterExcelInfo = (
-  info: ExcelImportInfo,
-  query: string
-): ExcelImportInfo => {
-  const normalizedQuery = normalize(query);
-  if (!normalizedQuery) return info;
-
-  return {
-    ...info,
-    sections: info.sections
-      .map((section) => {
-        const sectionMatches = normalize(section.sheetName).includes(
-          normalizedQuery
-        );
-        const headerMatches = section.headers.some((header) =>
-          normalize(header).includes(normalizedQuery)
-        );
-        const rows = section.rows.filter((row) =>
-          row.some((cell) => normalize(cell).includes(normalizedQuery))
-        );
-        return {
-          ...section,
-          rows: sectionMatches || headerMatches ? section.rows : rows
-        };
-      })
-      .filter((section) => section.rows.length)
-  };
-};
 
 const getGovernanceStats = (info: ExcelImportInfo) => {
   const cells = info.sections.flatMap((section) =>
@@ -243,13 +144,7 @@ export default function AssetDetails({
   );
   const { t } = useTranslation();
   const theme = useTheme();
-  const [excelSearch, setExcelSearch] = useState('');
   const excelImportInfo = parseExcelImportInfo(asset?.additionalInfos);
-  const filteredExcelInfo = useMemo(
-    () =>
-      excelImportInfo ? filterExcelInfo(excelImportInfo, excelSearch) : null,
-    [excelImportInfo, excelSearch]
-  );
   const fieldsToRender: {
     label: string;
     value: string | number;
@@ -313,27 +208,15 @@ export default function AssetDetails({
       ))}
       {excelImportInfo && (
         <View style={styles.excelContainer}>
-          <Text variant="titleLarge" style={styles.excelTitle}>
-            {t('excel_imported_sections')}
-          </Text>
           {!!excelImportInfo.source && (
             <Text variant="bodySmall" style={styles.excelSource}>
               {excelImportInfo.source}
             </Text>
           )}
           <ExcelGovernancePanel info={excelImportInfo} />
-          <Searchbar
-            placeholder={t('search_excel_fields')}
-            value={excelSearch}
-            onChangeText={setExcelSearch}
-            style={styles.excelSearch}
-          />
-          {filteredExcelInfo.sections.map((section) => (
-            <ExcelSection key={section.sheetName} section={section} />
-          ))}
-          {!filteredExcelInfo.sections.length && (
-            <Text style={styles.noExcelResults}>{t('no_results_found')}</Text>
-          )}
+          <Text variant="bodySmall" style={styles.excelSource}>
+            {t('excel_sections_as_tabs')}
+          </Text>
         </View>
       )}
       {asset.primaryUser && (
