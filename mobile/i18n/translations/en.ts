@@ -1155,6 +1155,7 @@ const locale = {
     'No asset rows were found. Please use the asset import template or the FVV maintenance kit format.',
   maintenance_kit_import_success:
     'Import complete: assets {{assetsCreated}} created/{{assetsUpdated}} updated, spare parts {{partsCreated}} created/{{partsUpdated}} updated, maintenance plans {{pmCreated}} created/{{pmUpdated}} updated',
+  excel_imported_sections: 'Imported Excel sections',
   wo_calendar: 'Work Orders Calendar',
   month: 'Month',
   week: 'Week',

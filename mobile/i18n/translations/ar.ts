@@ -1101,6 +1101,7 @@ const locale = {
     'لم يتم العثور على صفوف أصول. استخدم قالب استيراد الأصول أو قالب صيانة FVV.',
   maintenance_kit_import_success:
     'اكتمل الاستيراد: الأصول {{assetsCreated}} إنشاء/{{assetsUpdated}} تحديث، قطع الغيار {{partsCreated}} إنشاء/{{partsUpdated}} تحديث، خطط الصيانة {{pmCreated}} إنشاء/{{pmUpdated}} تحديث',
+  excel_imported_sections: 'أقسام Excel المستوردة',
   wo_calendar: 'تقويم أوامر العمل',
   month: 'شهر',
   week: 'أسبوع',

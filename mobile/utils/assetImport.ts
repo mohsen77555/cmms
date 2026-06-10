@@ -5,6 +5,10 @@ import {
   PartImportDTO,
   PreventiveMaintenanceImportDTO
 } from '../models/imports';
+import {
+  buildExcelImportInfo,
+  serializeExcelImportInfo
+} from './excelImportInfo';
 
 type HeaderMap = Partial<Record<keyof AssetImportDTO, string>>;
 
@@ -306,22 +310,9 @@ const formatFvvMaintenanceKit = (
     ? getSheetRows(workbook, sparePartsSheet).slice(1)
     : [];
 
-  const additionalInfos = [
-    `Imported from: ${fileName ?? 'FVV maintenance kit'}`,
-    '',
-    'Technical data:',
-    ...technicalRows.map((row) => `${row[0]}: ${row[1]}`),
-    '',
-    'Maintenance plan:',
-    ...maintenanceRows
-      .filter((row: unknown[]) => row[0] || row[1])
-      .map((row: unknown[]) => `${row[0]}: ${row[1]}`),
-    '',
-    'Spare parts:',
-    ...sparePartsRows
-      .filter((row: unknown[]) => row[1] || row[2])
-      .map((row: unknown[]) => `${row[1] ?? ''} - ${row[2] ?? ''}`)
-  ].join('\n');
+  const additionalInfos = serializeExcelImportInfo(
+    buildExcelImportInfo(workbook, getSheetRows, fileName)
+  );
 
   const assetName = model
     ? `FVV ${model}`

@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { AssetDTO as Asset } from '../../../models/asset';
 import * as React from 'react';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { CompanySettingsContext } from '../../../contexts/CompanySettingsContext';
 import { Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { View } from '../../../components/Themed';
-import { Divider, Text, useTheme } from 'react-native-paper';
+import { Card, Divider, IconButton, Text, useTheme } from 'react-native-paper';
 import { UserMiniDTO } from '../../../models/user';
 import { Customer } from '../../../models/customer';
 import { Vendor } from '../../../models/vendor';
@@ -19,6 +19,52 @@ import {
 import ListField from '../../../components/ListField';
 import BasicField from '../../../components/BasicField';
 import { getCustomFieldValuesForDetails } from '../../../models/form';
+import {
+  ExcelImportSection,
+  parseExcelImportInfo
+} from '../../../utils/excelImportInfo';
+
+const ExcelSection = ({ section }: { section: ExcelImportSection }) => {
+  const [expanded, setExpanded] = useState(false);
+  const visibleRows = expanded ? section.rows : section.rows.slice(0, 3);
+
+  return (
+    <Card style={styles.excelSection}>
+      <TouchableOpacity
+        onPress={() => setExpanded((value) => !value)}
+        style={styles.excelSectionHeader}
+      >
+        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+          <Text variant="titleMedium" style={styles.excelSectionTitle}>
+            {section.sheetName}
+          </Text>
+          <Text variant="bodySmall">
+            {section.rows.length} rows / {section.headers.length} columns
+          </Text>
+        </View>
+        <IconButton icon={expanded ? 'chevron-up' : 'chevron-down'} />
+      </TouchableOpacity>
+      {visibleRows.map((row, rowIndex) => (
+        <View key={`${section.sheetName}-${rowIndex}`} style={styles.excelRow}>
+          {section.headers.map((header, index) => {
+            const value = row[index];
+            if (!value) return null;
+            return (
+              <View key={`${header}-${index}`} style={styles.excelCell}>
+                <Text variant="bodySmall" style={styles.excelHeader}>
+                  {header}
+                </Text>
+                <Text variant="bodyMedium" style={styles.excelValue}>
+                  {value}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      ))}
+    </Card>
+  );
+};
 
 export default function AssetDetails({
   asset,
@@ -32,6 +78,7 @@ export default function AssetDetails({
   );
   const { t } = useTranslation();
   const theme = useTheme();
+  const excelImportInfo = parseExcelImportInfo(asset?.additionalInfos);
   const fieldsToRender: {
     label: string;
     value: string | number;
@@ -57,10 +104,14 @@ export default function AssetDetails({
     { label: t('area'), value: asset?.area },
     { label: t('barcode'), value: asset?.barCode },
     { label: t('nfc_tag'), value: asset?.nfcId },
-    {
-      label: t('additional_information'),
-      value: asset?.additionalInfos
-    },
+    ...(excelImportInfo
+      ? []
+      : [
+          {
+            label: t('additional_information'),
+            value: asset?.additionalInfos
+          }
+        ]),
     {
       label: t('placed_in_service'),
       value: getFormattedDate(asset?.inServiceDate)
@@ -89,6 +140,21 @@ export default function AssetDetails({
           isLink={field.isLink}
         />
       ))}
+      {excelImportInfo && (
+        <View style={styles.excelContainer}>
+          <Text variant="titleLarge" style={styles.excelTitle}>
+            {t('excel_imported_sections')}
+          </Text>
+          {!!excelImportInfo.source && (
+            <Text variant="bodySmall" style={styles.excelSource}>
+              {excelImportInfo.source}
+            </Text>
+          )}
+          {excelImportInfo.sections.map((section) => (
+            <ExcelSection key={section.sheetName} section={section} />
+          ))}
+        </View>
+      )}
       {asset.primaryUser && (
         <View>
           <View
@@ -177,5 +243,43 @@ export default function AssetDetails({
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  excelContainer: {
+    padding: 10,
+    backgroundColor: 'transparent'
+  },
+  excelTitle: {
+    fontWeight: 'bold',
+    marginBottom: 4
+  },
+  excelSource: {
+    marginBottom: 8
+  },
+  excelSection: {
+    marginVertical: 6
+  },
+  excelSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12
+  },
+  excelSectionTitle: {
+    fontWeight: 'bold'
+  },
+  excelRow: {
+    padding: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: '#ddd',
+    backgroundColor: 'transparent'
+  },
+  excelCell: {
+    marginBottom: 8,
+    backgroundColor: 'transparent'
+  },
+  excelHeader: {
+    color: '#676b6b'
+  },
+  excelValue: {
+    fontWeight: 'bold'
   }
 });
